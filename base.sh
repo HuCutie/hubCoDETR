@@ -5,7 +5,7 @@ mim install mmcv-full==1.5.0
 
 pip install -r requirements.txt
 
-pip install -v -e .
+pip setup.py install
 pip install fairscale
 pip install scipy
 pip install timm
