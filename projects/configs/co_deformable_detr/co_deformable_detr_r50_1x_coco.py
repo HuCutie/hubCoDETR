@@ -46,7 +46,7 @@ model = dict(
     query_head=dict(
         type='CoDeformDETRHead',
         num_query=300,
-        num_classes=80,
+        num_classes=4,
         in_channels=2048,
         sync_cls_avg_factor=True,
         with_box_refine=True,
@@ -113,7 +113,7 @@ model = dict(
             in_channels=256,
             fc_out_channels=1024,
             roi_feat_size=7,
-            num_classes=80,
+            num_classes=4,
             bbox_coder=dict(
                 type='DeltaXYWHBBoxCoder',
                 target_means=[0., 0., 0., 0.],
@@ -125,7 +125,7 @@ model = dict(
             loss_bbox=dict(type='GIoULoss', loss_weight=10.0*num_dec_layer*lambda_2)))],
     bbox_head=[dict(
         type='CoATSSHead',
-        num_classes=80,
+        num_classes=4,
         in_channels=256,
         stacked_convs=1,
         feat_channels=256,
@@ -300,6 +300,7 @@ data = dict(
 # optimizer
 optimizer = dict(
     type='AdamW',
+    # lr=1e-4,
     lr=2e-4,
     weight_decay=1e-4,
     paramwise_cfg=dict(
@@ -310,5 +311,11 @@ optimizer = dict(
         }))
 optimizer_config = dict(grad_clip=dict(max_norm=0.1, norm_type=2))
 # learning policy
-lr_config = dict(policy='step', step=[11])
-runner = dict(type='EpochBasedRunner', max_epochs=12)
+# lr_config = dict(policy='step', step=[11])
+lr_config = dict(
+    policy='CosineAnnealing',
+    warmup='linear',
+    warmup_iters=1000,
+    warmup_ratio=1.0 / 10,
+    min_lr_ratio=1e-5)
+runner = dict(type='EpochBasedRunner', max_epochs=100)

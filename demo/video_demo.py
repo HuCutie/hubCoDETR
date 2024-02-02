@@ -6,18 +6,20 @@ import mmcv
 
 from mmdet.apis import inference_detector, init_detector
 from projects import *
+from mmcv import Config
+from mmdet.datasets import build_dataset
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='MMDetection video demo')
-    parser.add_argument('video', help='Video file')
-    parser.add_argument('config', help='Config file')
-    parser.add_argument('checkpoint', help='Checkpoint file')
+    parser.add_argument('--video', default='/workspace/test2.mp4', help='Video file')
+    parser.add_argument('--config', default='/workspace/projects/configs/co_deformable_detr/co_deformable_detr_r50_1x_coco.py', help='Config file')
+    parser.add_argument('--checkpoint', default='/workspace/results/11373_2e-4/epoch_100.pth', help='Checkpoint file')
     parser.add_argument(
-        '--device', default='cuda:0', help='Device used for inference')
+        '--device', default='cuda:4', help='Device used for inference')
     parser.add_argument(
         '--score-thr', type=float, default=0.3, help='Bbox score threshold')
-    parser.add_argument('--out', type=str, help='Output video file')
+    parser.add_argument('--out', type=str, default='A_lr2e-4.mp4', help='Output video file')
     parser.add_argument('--show', action='store_true', help='Show video')
     parser.add_argument(
         '--wait-time',
@@ -44,9 +46,13 @@ def main():
             args.out, fourcc, video_reader.fps,
             (video_reader.width, video_reader.height))
 
+    cfg = Config.fromfile(args.config)
+    dataset = build_dataset(cfg.data.test)
+    PALETTE = getattr(dataset, 'PALETTE', None)
+    
     for frame in mmcv.track_iter_progress(video_reader):
         result = inference_detector(model, frame)
-        frame = model.show_result(frame, result, score_thr=args.score_thr)
+        frame = model.show_result(frame, result, score_thr=args.score_thr, bbox_color=PALETTE, text_color=PALETTE, mask_color=PALETTE,)
         if args.show:
             cv2.namedWindow('video', 0)
             mmcv.imshow(frame, 'video', args.wait_time)
