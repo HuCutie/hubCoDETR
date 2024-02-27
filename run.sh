@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0,1 bash tools/rungrass.sh projects/configs/co_deformable_detr/co_deformable_detr_r50_1x_coco.py 2 /workspace/results/paste_lr2e-4_grass
